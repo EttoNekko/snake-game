@@ -29,7 +29,7 @@ srand(time(0));
 			SDL_Event e;
 			//The picture that will be moving around on the screen
 			Head head;
-			Body body[121];
+			Body body[(SCREEN_HEIGHT/50)*(SCREEN_WIDTH/50)];
 			Fruit fruit;
 			//Current animation frame
 			int headFrame = 0;
@@ -97,7 +97,9 @@ srand(time(0));
 				int tempX = body[0].mPosX;
                 int tempY = body[0].mPosY;
 				head.move();
+				//check if head eat fruit
 				fruit.checkCollision(head.mCollider, body);
+				//generate the body
 				for(int i=1; i<=game.score; i++) {
                     int temp2X = body[i].mPosX;
                     int temp2Y = body[i].mPosY;
@@ -108,6 +110,7 @@ srand(time(0));
                     body[i].mCollider.x =  body[i].mPosX;
                     body[i].mCollider.y =  body[i].mPosY;
 				}
+				//check if head collide with body
 				for(int i=1; i<=game.score; i++) {
                     body[i].checkCollision(head.mCollider);
 				}

@@ -1,6 +1,5 @@
-class Head
+struct Head
 {
-    public:
 		//The X and Y offsets of the head
 		int mPosX, mPosY;
 		//The velocity of the head
@@ -11,6 +10,7 @@ class Head
 		static const int HEAD_WIDTH = 50;
 		static const int HEAD_HEIGHT = 50;
 		double degrees;
+		SDL_RendererFlip headFlip = SDL_FLIP_NONE;
 		//Maximum axis velocity of the head
 		static const int HEAD_VEL = 50;
 		//Initializes the variables
@@ -94,9 +94,8 @@ class Head
         };
 };
 
-class Body
+struct Body
 {
-        public:
 		//The X and Y offsets of the body;
 		int mPosX, mPosY;
         SDL_Rect mCollider;
@@ -138,12 +137,10 @@ class Body
     }
 };
 
-class Fruit
+struct Fruit
 {
-    private:
 		//The X and Y offsets of the fruit;
 		int mPosX, mPosY;
-    public:
         SDL_Rect mCollider;
 		//The dimensions of the dot
 		static const int FRUIT_WIDTH = 50;

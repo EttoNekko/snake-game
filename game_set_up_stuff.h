@@ -176,7 +176,6 @@ LTexture gStartScreenSprite;
 const int WALKING_ANIMATION_FRAMES = 3;
 SDL_Rect gHeadSpriteClips[ WALKING_ANIMATION_FRAMES ];
 SDL_Rect* currentHeadClip = NULL;
-SDL_RendererFlip headFlip = SDL_FLIP_NONE;
 //resize value to fit screen
 SDL_Rect sizeResize = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 SDL_Rect* textureResize = &sizeResize;
@@ -245,7 +244,7 @@ bool init()
 					printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
 					success = false;
 				}
-				Mix_VolumeMusic(80);
+				Mix_VolumeMusic(70);
 			}
 		}
 	}
@@ -375,4 +374,6 @@ void close()
 	//Quit SDL subsystems
 	IMG_Quit();
 	SDL_Quit();
+	Mix_Quit();
+	TTF_Quit();
 }
