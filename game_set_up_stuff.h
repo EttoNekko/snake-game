@@ -20,26 +20,26 @@ struct Game
     //Main loop flag
     bool gameStart;
     bool gameOver;
+    bool gameEnd;
     void gameData()
     {
         score = 0;
         gameOver = false;
         gameStart = false;
+        gameEnd = false;
     }
 };
 
 Game game;
 
 //Texture wrapper class
-class LTexture
+struct LTexture
 {
-    private:
 		//The actual hardware texture
 		SDL_Texture* mTexture;
 		//Image dimensions
 		int mWidth;
 		int mHeight;
-	public:
 		//Initializes variables
 		LTexture()
 		{
@@ -71,7 +71,6 @@ class LTexture
             {
                 //Color key image
                 SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
-
                 //Create texture from surface pixels
                 newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
                 if( newTexture == NULL )
@@ -170,6 +169,8 @@ LTexture gHeadSprite;
 LTexture gFruit;
 LTexture gBody;
 LTexture gScoreText;
+LTexture gGameOverScoreText;
+LTexture gGameOver;
 LTexture gBackgroundSprite;
 LTexture gStartScreenSprite;
 //head animation
@@ -296,6 +297,12 @@ bool loadMedia()
 			printf( "Failed to load text texture!\n" );
 			success = false;
 		}
+		//Render game over text
+		if( !gGameOverScoreText.loadFromRenderedText( "Your score is: "+ to_string(game.score), {255, 255, 51} ) )
+		{
+			printf( "Failed to load  gameOver text texture!\n" );
+			success = false;
+		}
 	}
 	//Load Start screen texture
 	if( !gStartScreenSprite.loadFromFile( "nyan_start_screen.png" ) )
@@ -307,6 +314,12 @@ bool loadMedia()
 	if( !gBackgroundSprite.loadFromFile( "background_sprite.png" ) )
 	{
 		printf( "Failed to load background texture!\n" );
+		success = false;
+	}
+	//Load game over texture
+	if( !gGameOver.loadFromFile( "nyan_gameOver_screen.png" ) )
+	{
+		printf( "Failed to load game over texture!\n" );
 		success = false;
 	}
 	//Load sprite sheet texture
@@ -361,6 +374,8 @@ void close()
 	gFruit.free();
 	gBody.free();
 	gScoreText.free();
+	gGameOverScoreText.free();
+	gGameOver.free();
 	gBackgroundSprite.free();
 	gStartScreenSprite.free();
 	//Free global font
