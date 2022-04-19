@@ -37,7 +37,7 @@ srand(time(0));
 			int backgroundFrame = 0;
 			//While application is running
 			//start screen loop
-			while( !game.gameOver || !game.gameStart || !game.gameEnd )
+			while( !game.gameStart || !game.gameOver || !game.gameEnd )
             {
                 //handle event if detected
                 while(SDL_PollEvent( &e ) != 0)
@@ -95,8 +95,8 @@ srand(time(0));
                         backgroundFrame = 0;
                     }
                     //Move the picture
-                    body[0].mPosX = head.mPosX;
-                    body[0].mPosY = head.mPosY;
+                    body[0].mPosX = head.mCollider.x;
+                    body[0].mPosY = head.mCollider.y;
                     int tempX = body[0].mPosX;
                     int tempY = body[0].mPosY;
                     head.move();
@@ -110,34 +110,36 @@ srand(time(0));
                         body[i].mPosY = tempY;
                         tempX = temp2X;
                         tempY = temp2Y;
-                        body[i].mCollider.x =  body[i].mPosX;
-                        body[i].mCollider.y =  body[i].mPosY;
                     }
                     //check if head collide with body
                     for(int i=1; i<=game.score; i++) {
                         body[i].checkCollision(head.mCollider);
                     }
                     //Clear screen
-                    //SDL_SetRenderDrawColor( gRenderer, 159, 159, 159, 255 );
-                    SDL_RenderClear( gRenderer );
-                    //Render texture to screen
-                    gBackgroundSprite.render(0, 0, currentBackgroundClip, textureResize);
-                    head.render();
-                    for(int i=1; i<=game.score; i++) {
-                        body[i].render();
-                    }
-                    fruit.render();
-                    gScoreText.loadFromRenderedText( "Score: "+ to_string(game.score), {255, 255, 51} );
-                    gScoreText.render(0, 0);
-                    //Update screen
-                    SDL_RenderPresent( gRenderer );
+                    if( !game.gameOver )
+                    {
+                        SDL_RenderClear( gRenderer );
+                        //Render texture to screen
+                        gBackgroundSprite.render(0, 0, currentBackgroundClip, textureResize);
+                        head.render();
+                        for(int i=1; i<=game.score; i++) {
+                            body[i].render();
+                        }
+                        fruit.render();
+                        gScoreText.loadFromRenderedText( "Score: "+ to_string(game.score), {255, 255, 51} );
+                        gScoreText.render(0, 0);
+                        //Update screen
+                        SDL_RenderPresent( gRenderer );
+                    };
+                    if( game.gameOver ) SDL_Delay(900);
                 }
+                //end screen render
                 if( game.gameOver && !game.gameEnd )
                 {
                     SDL_RenderClear( gRenderer );
                     gGameOver.render(0, 0, NULL, textureResize);
                     gGameOverScoreText.loadFromRenderedText("Your score is: " + to_string(game.score), {255, 255, 51} );
-                    gGameOverScoreText.render( (SCREEN_WIDTH - gGameOverScoreText.mWidth)/2, (SCREEN_HEIGHT - gGameOverScoreText.mHeight)/2 - 50 );
+                    gGameOverScoreText.render( (SCREEN_WIDTH - gGameOverScoreText.getWidth())/2, (SCREEN_HEIGHT - gGameOverScoreText.getHeight())/2 - 50 );
                     SDL_RenderPresent( gRenderer );
                 }
                 SDL_Delay(170);
