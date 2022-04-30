@@ -1,6 +1,6 @@
 //Screen dimension constants
-const int SCREEN_WIDTH = 50*11;
-const int SCREEN_HEIGHT = 50*11;
+const int SCREEN_WIDTH = 50*13;
+const int SCREEN_HEIGHT = 50*13;
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 //The window renderer
@@ -15,23 +15,80 @@ Mix_Music *gMusic4 = NULL;
 Mix_Chunk *gEat = NULL;
 Mix_Chunk *gDeath = NULL;
 
+enum Mode { wall = 1, noWall = 2};
+
 struct Game
 {
-    //game score
+    //game data
     int score;
+    int speed;
+    int countTimer;
     //Main loop flag
     bool gameStart;
     bool gameOver;
     bool deathAnimation;
     bool gameEnd;
-    void gameData()
+    Mode gameMode;
+    bool gameChange;
+    Game()
     {
         score = 0;
+        speed = 180;
+        countTimer = 0;
+        gameMode = wall;
+        gameChange = true;
         gameOver = false;
         gameStart = false;
-        bool deathAnimation = false;
+        deathAnimation = false;
         gameEnd = false;
     }
+    void gameEvent(SDL_Event& e)
+    {
+        //If a key was pressed
+        if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
+        {
+            switch( e.key.keysym.sym )
+            {
+                //Play the music
+                case SDLK_1: Mix_PlayMusic( gMusic1, -1 ); break;
+                case SDLK_2: Mix_PlayMusic( gMusic2, -1 ); break;
+                case SDLK_3: Mix_PlayMusic( gMusic3, -1 ); break;
+                case SDLK_9:
+                    //If the music is paused
+                    if( Mix_PausedMusic() == 1 )
+                    {
+                        //Resume the music
+                        Mix_ResumeMusic();
+                    }
+                    //If the music is playing
+                    else
+                    {
+                        //Pause the music
+                        Mix_PauseMusic();
+                    }
+                break;
+                //Stop the music
+                case SDLK_0: Mix_HaltMusic(); break;
+                //decide game mode;
+                case SDLK_o: if(gameChange) {gameMode = wall; gameChange = false;}; break;
+                case SDLK_p: if(gameChange) {gameMode = noWall; gameChange = false;}; break;
+            }
+        }
+    }
+
+    void speedCheck()
+    {
+        if(speed!=170)
+        {
+            countTimer++;
+        }
+        if(countTimer>=15)
+        {
+            speed = 170;
+            countTimer = 0;
+        }
+    }
+
 };
 
 Game game;
@@ -164,6 +221,7 @@ class LTexture
 //Scene sprites
 LTexture gHeadSprite;
 LTexture gFruit;
+LTexture gLightningFruit;
 LTexture gBody;
 LTexture gScoreText;
 LTexture gGameOverScoreText;
@@ -337,16 +395,22 @@ bool loadMedia()
 		printf( "Failed to load head texture!\n" );
 		success = false;
 	}
-	else if( !gFruit.loadFromFile( "pickelFruit.png" ) )
+    if( !gFruit.loadFromFile( "pickelFruit.png" ) )
 	{
 		printf( "Failed to load fruit texture!\n" );
 		success = false;
 	}
-	else if( !gBody.loadFromFile( "body.png" ) )
+	if( !gLightningFruit.loadFromFile( "lightningFruit.png" ) )
+	{
+		printf( "Failed to load lightning fruit texture!\n" );
+		success = false;
+	}
+	if( !gBody.loadFromFile( "body.png" ) )
 	{
 		printf( "Failed to load body texture!\n" );
 		success = false;
-	} else
+	}
+	else
 	{
 	    //Set head sprite clips
 		gHeadSpriteClips[ 0 ] = {0, 0, 50 , 50};
@@ -373,11 +437,13 @@ void close()
     //Free the sound effects
 	Mix_FreeChunk( gEat );
 	gEat = NULL;
+	Mix_FreeChunk( gDeath );
 	//Free the music
 	Mix_FreeMusic( gMusic1 );
 	Mix_FreeMusic( gMusic2 );
 	Mix_FreeMusic( gMusic3 );
-	gMusic1 = NULL; gMusic2 = NULL; gMusic3 = NULL;
+	Mix_FreeMusic( gMusic4 );
+	gMusic1 = NULL; gMusic2 = NULL; gMusic3 = NULL; gMusic4 = NULL;
 	//Free loaded image
 	gHeadSprite.free();
 	gFruit.free();
@@ -387,6 +453,9 @@ void close()
 	gGameOver.free();
 	gBackgroundSprite.free();
 	gStartScreenSprite.free();
+	currentHeadClip = NULL;
+	currentBackgroundClip = NULL;
+	currentStartScreenClip = NULL;
 	//Free global font
 	TTF_CloseFont( gFont );
 	gFont = NULL;

@@ -31,13 +31,15 @@ srand(time(0));
 			Head head;
 			Body body[(SCREEN_HEIGHT/50)*(SCREEN_WIDTH/50)];
 			Fruit fruit;
+			Fruit lightningFruit;
 			//Current animation frame
 			int headFrame = 0;
 			int startScreenFrame = 0;
 			int backgroundFrame = 0;
+			int i = 0;
 			//While application is running
 			//start screen loop
-			while( !game.gameOver || !game.gameStart || !game.gameEnd )
+			while( !game.gameStart || !game.gameOver || !game.gameEnd )
             {
                 //handle event if detected
                 while(SDL_PollEvent( &e ) != 0)
@@ -49,26 +51,31 @@ srand(time(0));
                             game.gameOver = true;
                             game.gameEnd = true;
                         };
+                        //Handle input for the game
+                        game.gameEvent( e );
                         if(e.type == SDL_KEYDOWN && !game.gameStart)
                         {
-                            game.gameStart = true;
+                            if(e.key.keysym.sym == SDLK_o || e.key.keysym.sym == SDLK_p)
+                            {
+                                game.gameStart = true;
+                            };
                         };
-                        //Handle input for the head
-                        head.handleEvent( e );
-                        if(e.type == SDL_KEYDOWN && !game.gameEnd && game.gameOver)
+                        if(e.type == SDL_KEYDOWN && !game.gameEnd && game.gameOver && game.deathAnimation)
                         {
                             game.gameEnd = true;
                         };
+                        //move the head
+                        head.headEvent( e );
                     }
                 //start screen render
                 if(!game.gameStart)
                 {
                     SDL_RenderClear( gRenderer );
                     // start screen animation
-                    currentStartScreenClip = &gStartScreenSpriteClips[startScreenFrame / 2];
+                    currentStartScreenClip = &gStartScreenSpriteClips[startScreenFrame / 5];
                     ++startScreenFrame;
                     //Cycle animation
-                    if( startScreenFrame / 2 >= STARTSCREEN_ANIMATION_FRAMES )
+                    if( startScreenFrame / 5 >= STARTSCREEN_ANIMATION_FRAMES )
                     {
                         startScreenFrame = 0;
                     };
@@ -95,14 +102,25 @@ srand(time(0));
                         backgroundFrame = 0;
                     }
                     //Move the picture
-                    body[0].mPosX = head.mPosX;
-                    body[0].mPosY = head.mPosY;
+                    body[0].mPosX = head.getX();
+                    body[0].mPosY = head.getY();
                     int tempX = body[0].mPosX;
                     int tempY = body[0].mPosY;
-                    head.move();
+                    head.moveHead();
                     //check if head eat fruit
-                    fruit.checkCollision(head.mCollider, body);
-                    //generate the body
+                    fruit.checkCollision(head, body, lightningFruit);
+                    if( lightningFruit.checkCollision(head, body, fruit) )
+                    {
+                        game.speed = 100;
+                    };
+                    game.speedCheck();
+                    //check if head collide with body
+                    for(int i=1; i<=game.score; i++) {
+                        body[i].checkCollision(head);
+                    }
+                    if(!game.gameOver)
+                    {
+                    //generate the body cordinate
                     for(int i=1; i<=game.score; i++) {
                         int temp2X = body[i].mPosX;
                         int temp2Y = body[i].mPosY;
@@ -110,37 +128,56 @@ srand(time(0));
                         body[i].mPosY = tempY;
                         tempX = temp2X;
                         tempY = temp2Y;
-                        body[i].mCollider.x =  body[i].mPosX;
-                        body[i].mCollider.y =  body[i].mPosY;
                     }
-                    //check if head collide with body
-                    for(int i=1; i<=game.score; i++) {
-                        body[i].checkCollision(head.mCollider);
                     }
                     //Clear screen
-                    //SDL_SetRenderDrawColor( gRenderer, 159, 159, 159, 255 );
+                        SDL_RenderClear( gRenderer );
+                        //Render texture to screen
+                        gBackgroundSprite.render(0, 0, currentBackgroundClip, textureResize);
+                        head.render();
+                        for(int i=1; i<=game.score; i++) {
+                            body[i].render();
+                        }
+                        fruit.renderNormal();
+                        lightningFruit.renderLightning();
+                        gScoreText.loadFromRenderedText( "Score: "+ to_string(game.score), {255, 255, 51} );
+                        gScoreText.render(0, 0);
+                        //Update screen
+                        SDL_RenderPresent( gRenderer );
+                    SDL_Delay(game.speed);
+                }
+                //play death animation
+                if( game.gameOver && !game.deathAnimation )
+                {
+                    head.reposition();
                     SDL_RenderClear( gRenderer );
                     //Render texture to screen
                     gBackgroundSprite.render(0, 0, currentBackgroundClip, textureResize);
-                    head.render();
                     for(int i=1; i<=game.score; i++) {
                         body[i].render();
                     }
-                    fruit.render();
+                    fruit.renderNormal();
+                    lightningFruit.renderLightning();
+                    if(i<1) {head.minusY(); i++; Mix_HaltMusic(); Mix_PlayChannel( -1, gDeath, 0 );} else head.plusY();
+                    head.render();
                     gScoreText.loadFromRenderedText( "Score: "+ to_string(game.score), {255, 255, 51} );
                     gScoreText.render(0, 0);
                     //Update screen
                     SDL_RenderPresent( gRenderer );
+                    if(head.getY() >= SCREEN_HEIGHT) game.deathAnimation = true;
+                    SDL_Delay(130);
                 }
-                if( game.gameOver && !game.gameEnd )
+                //end screen render
+                if( game.gameOver && !game.gameEnd && game.deathAnimation)
                 {
                     SDL_RenderClear( gRenderer );
                     gGameOver.render(0, 0, NULL, textureResize);
                     gGameOverScoreText.loadFromRenderedText("Your score is: " + to_string(game.score), {255, 255, 51} );
-                    gGameOverScoreText.render( (SCREEN_WIDTH - gGameOverScoreText.mWidth)/2, (SCREEN_HEIGHT - gGameOverScoreText.mHeight)/2 - 50 );
+                    gGameOverScoreText.render( (SCREEN_WIDTH - gGameOverScoreText.getWidth())/2, (SCREEN_HEIGHT - gGameOverScoreText.getHeight())/2 - 50 );
                     SDL_RenderPresent( gRenderer );
+                    if(i==1) {Mix_PlayMusic( gMusic4, -1 ); i++;};
                 }
-                SDL_Delay(170);
+
             }
         }
 	}

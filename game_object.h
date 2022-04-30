@@ -23,35 +23,13 @@ class Head
     mVelY = 0;
     };
     //Takes key presses and adjusts the head's velocity
-    void handleEvent( SDL_Event& e )
+    void headEvent( SDL_Event& e )
     {
         //If a key was pressed
         if( e.type == SDL_KEYDOWN && e.key.repeat == 0 )
         {
-            //Adjust the velocity
             switch( e.key.keysym.sym )
             {
-            //Play the music
-            case SDLK_1: Mix_PlayMusic( gMusic1, -1 ); break;
-            case SDLK_2: Mix_PlayMusic( gMusic2, -1 ); break;
-            case SDLK_3: Mix_PlayMusic( gMusic3, -1 ); break;
-            case SDLK_9:
-                    //If music is being played
-                        //If the music is paused
-                        if( Mix_PausedMusic() == 1 )
-                        {
-                            //Resume the music
-                            Mix_ResumeMusic();
-                        }
-                        //If the music is playing
-                        else
-                        {
-                            //Pause the music
-                            Mix_PauseMusic();
-                        }
-                    break;
-                //Stop the music
-                case SDLK_0: Mix_HaltMusic(); break;
                 //moving for head
                 case SDLK_UP: mVelY = -HEAD_VEL; mVelX = 0; degrees = 270; headFlip = SDL_FLIP_NONE; break;
                 case SDLK_DOWN: mVelY = HEAD_VEL; mVelX = 0; degrees = 90; headFlip = SDL_FLIP_VERTICAL; break;
@@ -61,38 +39,62 @@ class Head
         }
     };
     //Moves the head
-    void move()
+    void moveHead()
     {
         //Move the head left or right
         mPosX += mVelX;
-        //If the head went too far to the left or right
-        if( (mPosX < 0) || (mPosX + HEAD_WIDTH > SCREEN_WIDTH) )
-        {
-            game.gameOver = true;
-        }
         //Move the head up or down
         mPosY += mVelY;
-        //If the head went too far up or down
-        if( (mPosY < 0) || (mPosY + HEAD_HEIGHT > SCREEN_HEIGHT) )
+        if(game.gameMode == wall)
         {
-            game.gameOver = true;
+            //If the head went too far to the left or right
+            if( (mPosX < 0) || (mPosX + HEAD_WIDTH > SCREEN_WIDTH) )
+            {
+                game.gameOver = true;
+            }
+            //If the head went too far up or down
+            if( (mPosY < 0) || (mPosY + HEAD_HEIGHT > SCREEN_HEIGHT) )
+            {
+                game.gameOver = true;
+            }
+        }
+        if(game.gameMode == noWall)
+        {
+            if(mPosX < 0)
+            {
+                mPosX = SCREEN_WIDTH-HEAD_WIDTH;
+            };
+            if(mPosX + HEAD_WIDTH > SCREEN_WIDTH)
+            {
+                mPosX = 0;
+            };
+            if(mPosY < 0)
+            {
+                mPosY = SCREEN_HEIGHT - HEAD_WIDTH;
+            };
+            if(mPosY + HEAD_HEIGHT > SCREEN_HEIGHT)
+            {
+                mPosY = 0;
+            };
         }
     };
     void reposition()
     {
         if(mPosX < 0)
         {
-            //Move back
             mPosX+=HEAD_VEL;
         };
         if(mPosX + HEAD_WIDTH > SCREEN_WIDTH)
         {
-            //Move back
             mPosX-=HEAD_VEL;
         };
         if(mPosY < 0)
         {
             mPosY+=HEAD_VEL;
+        };
+        if(mPosY + HEAD_HEIGHT > SCREEN_HEIGHT)
+        {
+            mPosY-=HEAD_VEL;
         };
     }
     void minusY ()
@@ -146,12 +148,17 @@ class Fruit
         mPosX = (rand() % (SCREEN_WIDTH/FRUIT_WIDTH))*50;
         mPosY = (rand() % (SCREEN_HEIGHT/FRUIT_HEIGHT))*50;
     }
-    void render()
-		{
+    void renderNormal()
+    {
         //Show the fruit
         gFruit.render( mPosX, mPosY );
-        };
-    void checkCollision(Head a,Body b[])
+    };
+    void renderLightning()
+    {
+        //show the lightning fruit
+        gLightningFruit.render( mPosX, mPosY );
+    }
+    bool checkCollision(Head a,Body b[], Fruit c)
     {
     if( (a.getX() == mPosX && a.getY() == mPosY) )
         {
@@ -171,7 +178,13 @@ class Fruit
                     mPosY = (rand() % (SCREEN_HEIGHT/FRUIT_HEIGHT))*50;
                     same = true;
                 };
-                for(int i=1; i<=game.score; i++) {
+                if(mPosX == c.getX() && mPosY == c.getY())
+                {
+                    mPosX = (rand() % (SCREEN_WIDTH/FRUIT_WIDTH))*50;
+                    mPosY = (rand() % (SCREEN_HEIGHT/FRUIT_HEIGHT))*50;
+                    same = true;
+                }
+                for(int i=0; i<=game.score; i++) {
                     if(b[i].mPosX==mPosX&&b[i].mPosY==mPosY)
                     {
                         mPosX = (rand() % (SCREEN_WIDTH/FRUIT_WIDTH))*50;
@@ -182,6 +195,9 @@ class Fruit
 				}
             }
             game.score++;
+            return true;
         }
     }
+    int getX() {return mPosX;}
+    int getY() {return mPosY;}
 };
