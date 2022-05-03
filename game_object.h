@@ -158,7 +158,7 @@ class Fruit
         //show the lightning fruit
         gLightningFruit.render( mPosX, mPosY );
     }
-    bool checkCollision(Head a,Body b[], Fruit c)
+    bool checkCollision(Head a,Body b[], Fruit* c = NULL)
     {
     if( (a.getX() == mPosX && a.getY() == mPosY) )
         {
@@ -178,7 +178,7 @@ class Fruit
                     mPosY = (rand() % (SCREEN_HEIGHT/FRUIT_HEIGHT))*50;
                     same = true;
                 };
-                if(mPosX == c.getX() && mPosY == c.getY())
+                if(mPosX == c->getX() && mPosY == c->getY())
                 {
                     mPosX = (rand() % (SCREEN_WIDTH/FRUIT_WIDTH))*50;
                     mPosY = (rand() % (SCREEN_HEIGHT/FRUIT_HEIGHT))*50;

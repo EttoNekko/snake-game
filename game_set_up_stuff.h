@@ -225,7 +225,7 @@ LTexture gLightningFruit;
 LTexture gBody;
 LTexture gScoreText;
 LTexture gGameOverScoreText;
-LTexture gGameOver;
+LTexture gGameOverSprite;
 LTexture gBackgroundSprite;
 LTexture gStartScreenSprite;
 //head animation
@@ -243,6 +243,10 @@ SDL_Rect* currentStartScreenClip = NULL;
 const int BACKGROUND_ANIMATION_FRAMES = 6;
 SDL_Rect gBackgroundSpriteClips[ BACKGROUND_ANIMATION_FRAMES ];
 SDL_Rect* currentBackgroundClip = NULL;
+//game over animation
+const int GAMEOVER_ANIMATION_FRAMES = 12;
+SDL_Rect gGameOverSpriteClips[ GAMEOVER_ANIMATION_FRAMES ];
+SDL_Rect* currentGameOverClip = NULL;
 
 bool init()
 {
@@ -384,7 +388,7 @@ bool loadMedia()
 		success = false;
 	}
 	//Load game over texture
-	if( !gGameOver.loadFromFile( "nyan_gameOver_screen.png" ) )
+	if( !gGameOverSprite.loadFromFile( "nyan_gameOver_screen.png" ) )
 	{
 		printf( "Failed to load game over texture!\n" );
 		success = false;
@@ -428,6 +432,19 @@ bool loadMedia()
         gBackgroundSpriteClips[3] = {300, 0, 100, 100};
         gBackgroundSpriteClips[4] = {400, 0, 100, 100};
         gBackgroundSpriteClips[5] = {500, 0, 100, 100};
+        //set gameover sprite clip
+        gGameOverSpriteClips[0] = {0, 0, 550, 550};
+        gGameOverSpriteClips[1] = {550*1, 0, 550, 550};
+        gGameOverSpriteClips[2] = {550*2, 0, 550, 550};
+        gGameOverSpriteClips[3] = {550*3, 0, 550, 550};
+        gGameOverSpriteClips[4] = {550*4, 0, 550, 550};
+        gGameOverSpriteClips[5] = {550*5, 0, 550, 550};
+        gGameOverSpriteClips[6] = {550*6, 0, 550, 550};
+        gGameOverSpriteClips[7] = {550*7, 0, 550, 550};
+        gGameOverSpriteClips[8] = {550*8, 0, 550, 550};
+        gGameOverSpriteClips[9] = {550*9, 0, 550, 550};
+        gGameOverSpriteClips[10] = {550*10, 0, 550, 550};
+        gGameOverSpriteClips[11] = {550*11, 0, 550, 550};
 	}
 	return success;
 }
@@ -450,12 +467,13 @@ void close()
 	gBody.free();
 	gScoreText.free();
 	gGameOverScoreText.free();
-	gGameOver.free();
+	gGameOverSprite.free();
 	gBackgroundSprite.free();
 	gStartScreenSprite.free();
 	currentHeadClip = NULL;
 	currentBackgroundClip = NULL;
 	currentStartScreenClip = NULL;
+	currentGameOverClip = NULL;
 	//Free global font
 	TTF_CloseFont( gFont );
 	gFont = NULL;
