@@ -1,6 +1,6 @@
 //Screen dimension constants
-const int SCREEN_WIDTH = 50*13;
-const int SCREEN_HEIGHT = 50*13;
+const int SCREEN_WIDTH = 50*15;
+const int SCREEN_HEIGHT = 50*15;
 //The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 //The window renderer
@@ -22,7 +22,8 @@ struct Game
     //game data
     int score;
     int speed;
-    int countTimer;
+    int speedTimer;
+    int endAnimationTimer;
     //Main loop flag
     bool gameStart;
     bool gameOver;
@@ -34,7 +35,8 @@ struct Game
     {
         score = 0;
         speed = 180;
-        countTimer = 0;
+        speedTimer = 0;
+        endAnimationTimer = 0;
         gameMode = wall;
         gameChange = true;
         gameOver = false;
@@ -80,15 +82,22 @@ struct Game
     {
         if(speed!=170)
         {
-            countTimer++;
+            speedTimer++;
         }
-        if(countTimer>=15)
+        if(speedTimer>=15)
         {
             speed = 170;
-            countTimer = 0;
+            speedTimer = 0;
         }
     }
 
+    void endAnimtionCheck()
+    {
+        if(endAnimationTimer>=3950)
+        {
+            endAnimationTimer = 0;
+        }
+    }
 };
 
 Game game;
@@ -225,7 +234,9 @@ LTexture gLightningFruit;
 LTexture gBody;
 LTexture gScoreText;
 LTexture gGameOverScoreText;
-LTexture gGameOverSprite;
+LTexture gGameOverSprite1;
+LTexture gGameOverSprite2;
+LTexture gGameOverSprite3;
 LTexture gBackgroundSprite;
 LTexture gStartScreenSprite;
 //head animation
@@ -244,8 +255,10 @@ const int BACKGROUND_ANIMATION_FRAMES = 6;
 SDL_Rect gBackgroundSpriteClips[ BACKGROUND_ANIMATION_FRAMES ];
 SDL_Rect* currentBackgroundClip = NULL;
 //game over animation
-const int GAMEOVER_ANIMATION_FRAMES = 12;
-SDL_Rect gGameOverSpriteClips[ GAMEOVER_ANIMATION_FRAMES ];
+const int GAMEOVER_ANIMATION_FRAMES1 = 3;
+const int GAMEOVER_ANIMATION_FRAMES2 = 12;
+//shared gameover clip
+SDL_Rect gGameOverSpriteClips[ GAMEOVER_ANIMATION_FRAMES2 ];
 SDL_Rect* currentGameOverClip = NULL;
 
 bool init()
@@ -388,9 +401,19 @@ bool loadMedia()
 		success = false;
 	}
 	//Load game over texture
-	if( !gGameOverSprite.loadFromFile( "nyan_gameOver_screen.png" ) )
+	if( !gGameOverSprite1.loadFromFile( "nyan_gameOver_screen1.png" ) )
 	{
-		printf( "Failed to load game over texture!\n" );
+		printf( "Failed to load game over 1 texture!\n" );
+		success = false;
+	}
+	if( !gGameOverSprite2.loadFromFile( "nyan_gameOver_screen2.png" ) )
+	{
+		printf( "Failed to load game over 2 texture!\n" );
+		success = false;
+	}
+	if( !gGameOverSprite3.loadFromFile( "nyan_gameOver_screen3.png" ) )
+	{
+		printf( "Failed to load game over 3 texture!\n" );
 		success = false;
 	}
 	//Load sprite sheet texture
@@ -432,7 +455,7 @@ bool loadMedia()
         gBackgroundSpriteClips[3] = {300, 0, 100, 100};
         gBackgroundSpriteClips[4] = {400, 0, 100, 100};
         gBackgroundSpriteClips[5] = {500, 0, 100, 100};
-        //set gameover sprite clip
+        //set gameover sprite clip 2
         gGameOverSpriteClips[0] = {0, 0, 550, 550};
         gGameOverSpriteClips[1] = {550*1, 0, 550, 550};
         gGameOverSpriteClips[2] = {550*2, 0, 550, 550};
@@ -467,7 +490,9 @@ void close()
 	gBody.free();
 	gScoreText.free();
 	gGameOverScoreText.free();
-	gGameOverSprite.free();
+	gGameOverSprite1.free();
+	gGameOverSprite2.free();
+	gGameOverSprite3.free();
 	gBackgroundSprite.free();
 	gStartScreenSprite.free();
 	currentHeadClip = NULL;
