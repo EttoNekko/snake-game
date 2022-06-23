@@ -1,0 +1,54 @@
+# depslib dependency file v1.0
+1648562416 source:d:\app\project\pretty snake game\pretty\game_set_up_stuff.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<string>
+	<cmath>
+	<ctime>
+
+1648650341 source:d:\app\project\pretty snake game\pretty\main_excute.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<string>
+	<cmath>
+	<ctime>
+	"game_set_up_stuff.h"
+	"game_object.h"
+
+1648562416 d:\app\project\pretty snake game\pretty\game_set_up_stuff.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<string>
+	<cmath>
+	<ctime>
+
+1648563931 source:d:\app\project\pretty snake game\pretty\game object.cpp
+	"game_set_up_stuff.cpp"
+
+1648650720 d:\app\project\pretty snake game\pretty\game_set_up_stuff.h
+
+1648564942 d:\app\project\pretty snake game\pretty\game object.h
+
+1648651140 d:\app\project\pretty snake game\pretty\game_object.h
+
+1652086162 source:d:\app\project\pretty snake game v1\main_excute.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
+	<string>
+	<cmath>
+	<ctime>
+	"game_set_up_stuff.h"
+	"game_object.h"
+
+1652086162 d:\app\project\pretty snake game v1\game_set_up_stuff.h
+
+1652086162 d:\app\project\pretty snake game v1\game_object.h
+
